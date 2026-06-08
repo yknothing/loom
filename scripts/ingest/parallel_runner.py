@@ -19,9 +19,9 @@ sys.path.insert(0, str(SCRIPTS_DIR))
 
 from ingest.task_queue import TaskQueue
 from ingest.error_logger import log_failure
+from ingest.config import db_path
 
-ROOT = SCRIPTS_DIR.parent
-DB_PATH = ROOT / "data" / "task-queue.db"
+DB_PATH = db_path()
 
 _print_lock = Lock()
 _claim_lock = Lock()

@@ -9,11 +9,9 @@ from pathlib import Path
 from datetime import date
 from typing import Tuple
 
-ROOT = Path(__file__).resolve().parent.parent.parent
-WIKI_DIR = Path("/Volumes/t7_shield/ObsidianVault/llmwiki")
-# Fallback to project wiki if vault not mounted
-if not WIKI_DIR.exists():
-    WIKI_DIR = ROOT / "wiki"
+from .config import wiki_dir as _wiki_dir
+
+WIKI_DIR = _wiki_dir()
 LOG_PATH = WIKI_DIR / "log.md"
 INDEX_PATH = WIKI_DIR / "index.md"
 

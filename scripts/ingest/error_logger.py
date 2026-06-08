@@ -30,8 +30,9 @@ from pathlib import Path
 from typing import Optional
 
 
-ROOT = Path(__file__).resolve().parent.parent.parent
-LOG_PATH = ROOT / "data" / "error-log.jsonl"
+from ingest.config import data_dir
+
+LOG_PATH = data_dir() / "error-log.jsonl"
 
 
 def log_failure(

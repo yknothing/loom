@@ -12,12 +12,17 @@ Usage:
 
 import argparse
 import re
+import sys
 from collections import Counter
 from datetime import datetime, date, timedelta
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-WIKI_DIR = ROOT / "wiki"
+SCRIPTS_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(SCRIPTS_DIR))
+
+from ingest.config import wiki_dir
+
+WIKI_DIR = wiki_dir()
 LOG_PATH = WIKI_DIR / "log.md"
 DAILY_DIR = WIKI_DIR / "daily"
 

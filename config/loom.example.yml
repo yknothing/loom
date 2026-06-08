@@ -1,0 +1,18 @@
+# loom configuration — copy to loom.yml and edit
+# loom.yml is gitignored
+
+# Data directories (TechLoom repo)
+data:
+  raw_dir: /Users/th/GitHub/TechLoom/raw
+  wiki_dir: /Users/th/GitHub/TechLoom/wiki
+  data_dir: /Users/th/GitHub/TechLoom/data
+  config_dir: /Users/th/GitHub/TechLoom/config
+
+# Database
+db_path: /Users/th/GitHub/TechLoom/data/task-queue.db
+
+# Logs
+log_dir: /Users/th/GitHub/TechLoom/logs
+
+# Optional: Obsidian vault sync
+# obsidian_vault: /Volumes/t7_shield/ObsidianVault/llmwiki

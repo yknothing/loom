@@ -19,8 +19,12 @@ from collections import defaultdict
 from pathlib import Path
 from datetime import datetime
 
-ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_WIKI_DIR = ROOT / "wiki"
+SCRIPTS_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(SCRIPTS_DIR))
+
+from ingest.config import wiki_dir
+
+DEFAULT_WIKI_DIR = wiki_dir()
 
 SCAN_SUBDIRS = ["ideas", "people", "mental-models"]
 

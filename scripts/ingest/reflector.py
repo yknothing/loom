@@ -32,11 +32,11 @@ SCRIPTS_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(SCRIPTS_DIR))
 
 from ingest.prompts import REFLECT_SYSTEM_PROMPT, build_reflect_prompt
+from ingest.config import db_path, wiki_dir, data_dir
 
-ROOT = SCRIPTS_DIR.parent
-DB_PATH = ROOT / "data" / "task-queue.db"
-WIKI_DIR = ROOT / "wiki"
-STATE_FILE = ROOT / "data" / "reflector-state.json"
+DB_PATH = db_path()
+WIKI_DIR = wiki_dir()
+STATE_FILE = data_dir() / "reflector-state.json"
 
 
 def _read_api_key(provider: str = "xiaomimimo") -> str:

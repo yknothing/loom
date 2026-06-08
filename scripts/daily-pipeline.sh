@@ -6,7 +6,20 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+
+# ── Load paths from config/loom.yml ──────────────────────────
+_cfg() {
+  python3 -c "
+import yaml, sys
+d = yaml.safe_load(open('${SCRIPT_DIR}/../config/loom.yml'))
+keys = '$1'.split('.')
+for k in keys:
+    d = d.get(k, {}) if isinstance(d, dict) else None
+print(d or '')
+"
+}
+
+DATA_ROOT="$(_cfg data.data_dir)/.."
 
 echo "🧠 Cognitive Flywheel — Daily Pipeline"
 echo "========================================="

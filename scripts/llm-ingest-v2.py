@@ -27,9 +27,9 @@ from ingest.task_queue import TaskQueue
 from ingest.worker import call_llm
 from ingest.wiki_writer import write_ingest_result, append_log
 from ingest.error_logger import log_failure, summarize_errors
+from ingest.config import db_path, raw_dir
 
-ROOT = SCRIPTS_DIR.parent
-DB_PATH = ROOT / "data" / "task-queue.db"
+DB_PATH = db_path()
 
 
 def main():
@@ -85,7 +85,7 @@ def main():
         from ingest.task_queue import TaskQueue as _Q
         files = []
         for subdir in ("rss", "papers", "web", "code", "journal"):
-            d = ROOT / "raw" / subdir
+            d = raw_dir() / subdir
             if d.exists():
                 for p in sorted(d.glob("*.md")):
                     files.append(str(p))

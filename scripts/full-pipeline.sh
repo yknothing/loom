@@ -14,12 +14,24 @@
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
-DB="$PROJECT_DIR/data/task-queue.db"
-RAW_DIR="$PROJECT_DIR/raw/rss"
+# ── Load paths from config/loom.yml ──────────────────────────
+_cfg() {
+  python3 -c "
+import yaml, sys
+d = yaml.safe_load(open('${SCRIPT_DIR}/../config/loom.yml'))
+keys = '$1'.split('.')
+for k in keys:
+    d = d.get(k, {}) if isinstance(d, dict) else None
+print(d or '')
+"
+}
+
+DATA_ROOT="$(_cfg data.data_dir)"
+RAW_DIR="$(_cfg data.raw_dir)/rss"
+DB="$(_cfg db_path)"
+LOG_DIR="$(_cfg log_dir)"
 VAULT_DIR="/Volumes/t7_shield/ObsidianVault/llmwiki"
-LOG_DIR="$PROJECT_DIR/logs"
 
 TIMESTAMP=$(date '+%Y-%m-%d_%H%M%S')
 PIPELINE_LOG="$LOG_DIR/pipeline-${TIMESTAMP}.log"
@@ -91,10 +103,10 @@ import sys, os
 sys.path.insert(0, os.environ["SCRIPT_DIR"])
 from pathlib import Path
 from ingest.task_queue import TaskQueue
+from ingest.config import db_path, raw_dir
 
-PROJECT_DIR = Path(os.environ["PROJECT_DIR"])
-RAW_DIR = PROJECT_DIR / "raw" / "rss"
-DB_PATH = PROJECT_DIR / "data" / "task-queue.db"
+RAW_DIR = raw_dir() / "rss"
+DB_PATH = db_path()
 
 queue = TaskQueue(str(DB_PATH))
 
@@ -139,7 +151,7 @@ if [ "$PENDING" -gt 0 ]; then
     log "⚙️  Step 3/5: Running LLM ingest ($PENDING pending)..."
 
     # Use smart_runner for provider rotation
-    cd "$PROJECT_DIR"
+    cd "$DATA_ROOT/.."
     bash "$SCRIPT_DIR/ingest/smart_runner.sh" 2>&1 | tee -a "$PIPELINE_LOG" && INGEST_RC=$? || INGEST_RC=$?
 
     if [ $INGEST_RC -ne 0 ]; then
@@ -178,10 +190,11 @@ log ""
 log "🔄 Step 4/5: Syncing to Obsidian vault..."
 
 if [ -d "$VAULT_DIR" ]; then
+    WIKI_DIR="$(_cfg data.wiki_dir)"
     # Sync raw/
-    rsync -av --delete "$PROJECT_DIR/raw/" "$VAULT_DIR/raw/" 2>&1 | tail -3 | tee -a "$PIPELINE_LOG"
+    rsync -av --delete "$RAW_DIR/../" "$VAULT_DIR/raw/" 2>&1 | tail -3 | tee -a "$PIPELINE_LOG"
     # Sync wiki/
-    rsync -av --delete "$PROJECT_DIR/wiki/" "$VAULT_DIR/wiki/" 2>&1 | tail -3 | tee -a "$PIPELINE_LOG"
+    rsync -av --delete "$WIKI_DIR/" "$VAULT_DIR/wiki/" 2>&1 | tail -3 | tee -a "$PIPELINE_LOG"
     log "   ✅ Vault sync complete"
 else
     log "   ⚠️  Vault not mounted ($VAULT_DIR), skipping sync"
@@ -226,7 +239,7 @@ conn.close()
 ")
 
 if [ "$DONE_COUNT" -ge 5 ]; then
-    REFLECT_OUTPUT=$(cd "$PROJECT_DIR" && python3 scripts/ingest/reflector.py --articles 30 --provider kimi 2>&1) && REFLECT_RC=$? || REFLECT_RC=$?
+    REFLECT_OUTPUT=$(cd "$DATA_ROOT/.." && python3 scripts/ingest/reflector.py --articles 30 --provider kimi 2>&1) && REFLECT_RC=$? || REFLECT_RC=$?
     echo "$REFLECT_OUTPUT" | tee -a "$PIPELINE_LOG"
 
     if [ $REFLECT_RC -ne 0 ]; then

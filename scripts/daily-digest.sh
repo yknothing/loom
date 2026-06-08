@@ -6,8 +6,21 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-DAILY_DIR="$PROJECT_DIR/wiki/daily"
+
+# ── Load paths from config/loom.yml ──────────────────────────
+_cfg() {
+  python3 -c "
+import yaml, sys
+d = yaml.safe_load(open('${SCRIPT_DIR}/../config/loom.yml'))
+keys = '$1'.split('.')
+for k in keys:
+    d = d.get(k, {}) if isinstance(d, dict) else None
+print(d or '')
+"
+}
+
+WIKI_DIR="$(_cfg data.wiki_dir)"
+DAILY_DIR="$WIKI_DIR/daily"
 
 # Parse optional args
 DAYS=1
@@ -25,7 +38,7 @@ TODAY=$(date '+%Y-%m-%d')
 OUTFILE="$DAILY_DIR/${TODAY}.md"
 
 # Generate digest via curator.py
-cd "$PROJECT_DIR"
+cd "$(_cfg data.data_dir)/.."
 DIGEST=$(python3 "$SCRIPT_DIR/curator.py" --days "$DAYS" --top "$TOP" 2>/tmp/cf-digest-err.log) && RC=$? || RC=$?
 
 if [ $RC -ne 0 ]; then
@@ -56,7 +69,7 @@ fi
     echo "来源: scripts/curator.py"
     echo ""
     echo "$DIGEST"
-} >> "$PROJECT_DIR/wiki/log.md"
+} >> "$WIKI_DIR/log.md"
 
 # Output to stdout for OpenClaw
 echo "$DIGEST"

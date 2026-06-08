@@ -19,8 +19,12 @@ import sys
 from datetime import datetime, date, timedelta
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-WIKI_DIR = ROOT / "wiki"
+SCRIPTS_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(SCRIPTS_DIR))
+
+from ingest.config import wiki_dir
+
+WIKI_DIR = wiki_dir()
 SPECIAL_FILES = {"index.md", "log.md"}
 # Special files are excluded from orphan checks (they're entry points)
 # but their wikilinks ARE checked for broken targets

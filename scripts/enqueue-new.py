@@ -20,10 +20,10 @@ SCRIPTS_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPTS_DIR))
 
 from ingest.task_queue import TaskQueue
+from ingest.config import db_path, raw_dir
 
-ROOT = SCRIPTS_DIR.parent
-DB_PATH = ROOT / "data" / "task-queue.db"
-RAW_DIR = ROOT / "raw"
+DB_PATH = db_path()
+RAW_DIR = raw_dir()
 
 
 def find_raw_files() -> list[str]:

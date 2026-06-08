@@ -28,10 +28,10 @@ SCRIPTS_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPTS_DIR))
 
 from ingest.task_queue import TaskQueue
+from ingest.config import db_path, data_dir
 
-ROOT = SCRIPTS_DIR.parent  # scripts/ → project root
-DB_PATH = ROOT / "data" / "task-queue.db"
-DIGEST_STATE_PATH = ROOT / "data" / "digest-state.json"
+DB_PATH = db_path()
+DIGEST_STATE_PATH = data_dir() / "digest-state.json"
 
 # Categories that tend to be news-heavy, not insight-rich → pull them down
 NEWSY_CATEGORIES = {"opinion", "other"}
