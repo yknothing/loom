@@ -6,8 +6,12 @@ __pycache__/
 venv/
 .pytest_cache/
 
-# Data — generated at runtime
+# Data — symlinked to TechLoom (separate repo)
+raw/
+wiki/
+config/
 data/
+logs/
 *.db
 *.db-journal
 *.db-wal
