@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.pytest_cache/
+
+# Data — generated at runtime
+data/
+*.db
+*.db-journal
+*.db-wal
+
+# Secrets
+.env
+*.secret
+config/providers.yml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+logs/
+*.log
+
+# Temp
+*.tmp
+*.swp
+*~
