@@ -324,6 +324,9 @@ def test_real_wiki_contradictions():
     wiki_dir = Path(__file__).resolve().parent.parent / "wiki"
     if not wiki_dir.exists():
         pytest.skip("No wiki directory")
+    ideas_dir = wiki_dir / "ideas"
+    if not ideas_dir.exists() or not any(ideas_dir.glob("*.md")):
+        pytest.skip("Wiki has no idea pages yet")
 
     entity_claims, person_timeline = extract_entity_claims(wiki_dir)
 

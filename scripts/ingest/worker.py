@@ -49,47 +49,20 @@ OUTLINE_SYSTEM_PROMPT = (
 
 
 def _read_api_key(provider: str = "xiaomimimo") -> str:
-    """Read API key from leader agent's auth-profiles."""
-    import pathlib
-    auth_path = pathlib.Path.home() / ".openclaw/agents/leader/agent/auth-profiles.json"
-    with open(auth_path) as f:
-        auth = json.load(f)
-    return auth["profiles"][f"{provider}:default"]["key"]
+    """Resolve API key for a provider key-profile.
+
+    Resolution order (see ingest.providers.resolve_api_key):
+      1. Environment (EMERGENT_LLM_KEY / LOOM_API_KEY_<PROFILE> / <PROFILE>_API_KEY)
+      2. config/loom.yml → providers.<name>.api_key
+      3. Legacy openclaw auth-profiles.json
+    """
+    from .providers import resolve_api_key
+    return resolve_api_key(provider)
 
 
-# ⛔⛔⛔ MIMO CONSTRAINTS (violated 3 times, do NOT change without checking):
-#   1. max_tokens MUST be ≤ 16384 (larger values cause SSL disconnect)
-#   2. NEVER use ProxyHandler({}) or NO_PROXY to bypass system proxy
-#      (Mimo SGP is only reachable via the system https_proxy)
-# See MEMORY.md → "Mimo 硬性约束" for full context.
-
-PROVIDERS = {
-    "mimo": {
-        "base_url": "https://token-plan-sgp.xiaomimimo.com/v1",
-        "model": "mimo-v2.5-pro",
-        "max_tokens": 16384,
-        "api": "openai",
-        "auth_header": "Bearer",
-        "key_profile": "xiaomimimo",
-    },
-    "kimi": {
-        "base_url": "https://api.kimi.com/coding",
-        "model": "kimi-for-coding",
-        "max_tokens": 32768,
-        "api": "anthropic",
-        "auth_header": "x-api-key",
-        "key_profile": "kimi",
-        "supports_cache_control": False,
-    },
-    "deepseek": {
-        "base_url": "https://api.deepseek.com/v1",
-        "model": "deepseek-chat",
-        "max_tokens": 8192,
-        "api": "openai",
-        "auth_header": "Bearer",
-        "key_profile": "deepseek",
-    },
-}
+# Provider registry now lives in ingest.providers (config-overridable).
+# Kept exported here for backward compatibility.
+from .providers import BUILTIN_PROVIDERS as PROVIDERS
 
 
 def _parse_frontmatter(text: str) -> dict:
@@ -169,6 +142,18 @@ def _single_llm_call(
     output_tokens, raw_response, latency_ms, error_log.
     On failure: success=False, error (str), plus the rest.
     """
+    if api_format == "emergent":
+        from .emergent_client import emergent_llm_call
+        return emergent_llm_call(
+            user_prompt=user_prompt,
+            system_prompt=system_prompt,
+            model=model,
+            api_key=api_key,
+            max_tokens=max_tokens,
+            max_retries=max_retries,
+            timeout=timeout,
+        )
+
     use_cache_control = False
 
     if api_format == "anthropic":
@@ -846,8 +831,9 @@ def call_llm(
     meta = _parse_frontmatter(raw_text)
     body = _extract_body(raw_text)
 
-    # --- Resolve provider config ---
-    prov = PROVIDERS.get(provider, PROVIDERS["kimi"])
+    # --- Resolve provider config (builtin + config/loom.yml overrides) ---
+    from .providers import get_provider
+    prov = get_provider(provider)
     if api_key is None:
         key_profile = prov.get("key_profile", provider)
         api_key = _read_api_key(key_profile)

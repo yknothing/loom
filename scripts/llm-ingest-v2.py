@@ -43,9 +43,10 @@ def main():
                         help="Model override (default: auto from provider)")
     parser.add_argument("--base-url", default="",
                         help="Base URL override (default: auto from provider)")
-    parser.add_argument("--provider", default="kimi",
-                        choices=["kimi", "mimo", "deepseek"],
-                        help="LLM provider (default: kimi)")
+    parser.add_argument("--provider", default=None,
+                        choices=["kimi", "mimo", "deepseek", "emergent"],
+                        help="LLM provider (default: providers.default from "
+                             "config/loom.yml, falling back to kimi)")
     parser.add_argument("--timeout", type=int, default=120)
     parser.add_argument("--max-retries", type=int, default=3)
     parser.add_argument("--batch-size", type=int, default=20)
@@ -57,6 +58,10 @@ def main():
     parser.add_argument("--single", action="store_true",
                         help="Force single-shot mode (backward compat)")
     args = parser.parse_args()
+
+    if args.provider is None:
+        from ingest.providers import default_provider
+        args.provider = default_provider()
 
     queue = TaskQueue(str(DB_PATH))
 

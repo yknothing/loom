@@ -14,7 +14,16 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
 
-REVIEW_QUEUE_PATH = Path("data/review-queue.json")
+def _default_queue_path() -> Path:
+    """Resolve the queue file via central config (was a cwd-relative path)."""
+    try:
+        from .config import data_dir
+        return data_dir() / "review-queue.json"
+    except Exception:
+        return Path("data/review-queue.json")
+
+
+REVIEW_QUEUE_PATH = _default_queue_path()
 
 
 def _load(path: Path) -> dict:

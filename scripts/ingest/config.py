@@ -45,6 +45,17 @@ def _get(key: str, default: Optional[str] = None) -> Optional[str]:
     return d if d is not None else default
 
 
+def get(key: str, default=None):
+    """Public dot-separated config getter, e.g. get('providers.default')."""
+    return _get(key, default)
+
+
+def reload():
+    """Drop the cached config so the next read reloads loom.yml."""
+    global _config
+    _config = None
+
+
 # ── Public paths ──────────────────────────────────────────────
 
 def raw_dir() -> Path:

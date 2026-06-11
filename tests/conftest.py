@@ -11,6 +11,14 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 
+@pytest.fixture(autouse=True)
+def _isolate_review_queue(tmp_path, monkeypatch):
+    """Prevent tests from writing to the real data/review-queue.json."""
+    from ingest import review_queue
+    monkeypatch.setattr(review_queue, "REVIEW_QUEUE_PATH",
+                        tmp_path / "review-queue.json")
+
+
 @pytest.fixture
 def tmp_wiki(tmp_path):
     """Create a temporary wiki directory structure."""

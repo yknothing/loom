@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #002fa7;
+}
+
+body {
+  @apply bg-white text-ink font-sans antialiased;
+}
+
+::selection {
+  background: #002fa7;
+  color: #fff;
+}
+
+.swiss-card {
+  @apply bg-white border border-line rounded-md;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.swiss-card-hover:hover {
+  @apply -translate-y-1 shadow-md border-zinc-300;
+}
+
+.label-xs {
+  @apply text-xs tracking-[0.2em] uppercase text-muted font-medium;
+}
+
+.prose-loom a {
+  color: #002fa7 !important;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(0, 47, 167, 0.3);
+}
+.prose-loom a:hover {
+  border-bottom-color: #002fa7;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #d4d4d8;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}

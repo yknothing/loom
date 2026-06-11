@@ -33,8 +33,16 @@ WIKI_DIR = _wiki_dir()
 LOG_PATH = WIKI_DIR / "log.md"
 INDEX_PATH = WIKI_DIR / "index.md"
 
-RAW_DIR_BASE = _raw_dir()
+ROOT = SCRIPTS_DIR.parent  # loom repo root (kept patchable for tests)
 WIKI_SUBDIRS = ["ideas", "people", "mental-models", "projects", "daily", "code"]
+
+
+def _rel_to_raw(filepath: Path) -> str:
+    """Path of a raw file relative to the live RAW_DIR (fallback: filename)."""
+    try:
+        return str(Path(filepath).relative_to(RAW_DIR))
+    except ValueError:
+        return Path(filepath).name
 
 
 # ---------------------------------------------------------------------------
@@ -300,7 +308,7 @@ def ingest_file(filepath: Path, dry_run: bool = False) -> list[str]:
             "title": title,
             "created": existing_meta.get("created", today),
             "updated": today,
-            "sources": list(set(existing_sources + [str(filepath.relative_to(RAW_DIR_BASE))])),
+            "sources": list(set(existing_sources + [_rel_to_raw(filepath)])),
             "related": [f"people/{slugify(p)}" for p in people],
             "tags": keywords[:5],
         }
@@ -368,7 +376,7 @@ def ingest_file(filepath: Path, dry_run: bool = False) -> list[str]:
         person_meta = {
             "name": person,
             "role": existing_meta.get("role", ""),
-            "sources": list(set(existing_person_sources + [str(filepath.relative_to(RAW_DIR_BASE))])),
+            "sources": list(set(existing_person_sources + [_rel_to_raw(filepath)])),
             "updated": today,
         }
 
@@ -384,7 +392,7 @@ def ingest_file(filepath: Path, dry_run: bool = False) -> list[str]:
         print(f"     ✅ people/{person_slug}.md")
 
     # --- 3. Append to log -------------------------------------------------
-    source_rel = str(filepath.relative_to(RAW_DIR_BASE))
+    source_rel = _rel_to_raw(filepath)
     append_log(source_rel, title, updated_pages)
 
     return updated_pages
@@ -426,7 +434,7 @@ def main():
         for f in args.files:
             p = Path(f)
             if not p.is_absolute():
-                p = RAW_DIR_BASE / p
+                p = RAW_DIR / p
             target_files.append(p)
 
     if args.all_unprocessed:
@@ -435,7 +443,7 @@ def main():
             d = RAW_DIR / subdir
             if d.exists():
                 for p in sorted(d.glob("*.md")):
-                    rel = str(p.relative_to(RAW_DIR_BASE))
+                    rel = _rel_to_raw(p)
                     if rel not in processed:
                         target_files.append(p)
 

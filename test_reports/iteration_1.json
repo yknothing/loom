@@ -1,0 +1,42 @@
+{
+  "summary": "First test pass for Loom Console (FastAPI + React). Backend: 27/27 pytest cases pass against the public preview URL — auth (login/logout/register/me, lockout-safe), dashboard, tasks (list/filter/enqueue-raw/retry-failed), wiki (tree/page/search/graph/lint), content (submit text+url, review), sources, settings (provider catalog + persistence), pipeline runner (start + graceful exit on LLM budget failure). Frontend: all major flows verified end-to-end — wrong-password error chinese message, admin login → dashboard with 6 stat cards, pipeline-run button works and event stream shows graceful LLM failure rows, task filter/search/enqueue/retry buttons render, wiki tree + page render, search returns context hits, knowledge graph canvas renders, submit text mode produces '已加入队列' toast, settings shows all 4 providers (emergent/mimo/kimi/deepseek) and persists model, member register → dashboard works, logout returns to /login, register-name field appears after toggle-auth-mode-btn.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/auth/logout", "issue": "Typo in routers/auth_routes.py line 83 — response.delete_cookie('refres_token') (extra harmless no-op alongside the correct 'refresh_token' delete on line 84). Cosmetic only."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Wiki.js", "issue": "Initial collapsed state hides the 'mental-models' section. useState({ ideas: true, people: true }) omits 'mental-models', so 7th wiki page is invisible in tree until user manually clicks the section header. Dashboard counter shows 7 but tree only shows 6 by default — mildly confusing for new users.", "selector": "[data-testid=\"wiki-section-mental-models\"]", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "(Optional) Fix Wiki.js initial open state to include every section returned by /api/wiki/tree (or default-open all sections) so the 7th page (mental-models/commoditize-your-complement) is visible without an extra click.",
+    "(Optional) Remove the dead 'refres_token' delete_cookie call in routers/auth_routes.py line 83 to avoid future grep confusion."
+  ],
+  "critical_code_review_comments": [
+    "auth_routes.py L83 — typo `refres_token` deletes a non-existent cookie. Harmless, but should be removed.",
+    "All routers correctly require Depends(get_current_user) — unauthenticated requests return 401 as expected.",
+    "Pipeline STATE is in-process module-level dict — works for a single backend instance but will not survive a restart and will be incoherent under multiple workers. Acceptable for small-team MVP; flag for future scaling.",
+    "/api/submit with auto_process=True mutates the shared STATE and starts a background task even if a run was just stopped — race-free because STATE['running'] is checked, but a Lock would be cleaner.",
+    "MongoDB query usage filters by `_id` string ('pipeline') for settings — fine and consistent.",
+    "Knowledge graph payload key is `links` (matches frontend GraphPage which reads `r.data.links`); review request mentions 'edges' but that's descriptive only — no bug."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py"
+  ],
+  "success_rate": {"backend": "100% (27/27)", "frontend": "100% of tested flows"},
+  "test_credentials": "admin@loom.dev / LoomAdmin2026! (admin), dynamically registered test_<uuid>@example.com / MemberPass1! (member)",
+  "seed_data_creation": "Backend tests create a transient member user (test_<uuid>@example.com) and submit one TEST_<uuid> article to /api/submit with auto_process=false; both remain in DB / queue but are clearly TEST_ prefixed. Settings document was overwritten to provider=emergent, model=openai/gpt-5.4, two_stage=true (matches the prod default).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Pytest suite /app/backend/tests/backend_test.py is reusable (loads REACT_APP_BACKEND_URL from /app/frontend/.env via python-dotenv). It is a flat-file test (no conftest needed). Run with: python -m pytest /app/backend/tests/backend_test.py -v --junitxml=/app/test_reports/pytest/pytest_results.xml. The Pipeline test waits up to 15s for the runner to exit; with EMERGENT_LLM_KEY budget exhausted it finishes within ~3-5s. EMERGENT_LLM_KEY budget exhausted is EXPECTED — pipeline events show 'ChatError: Failed to generate chat completion: litellm.BadRequest…' and tasks transition to failed status gracefully, no crash.",
+  "rca of the issue": "Wiki tree 6-vs-7 mismatch: hard-coded initial open map in /app/frontend/src/pages/Wiki.js line 37 — `useState({ ideas: true, people: true })`. Fix: derive open state from tree keys after the GET /api/wiki/tree response, e.g. setOpen(Object.fromEntries(Object.keys(data).map(k => [k, true])))."
+}
