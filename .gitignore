@@ -39,3 +39,9 @@ logs/
 *.tmp
 *.swp
 *~
+.env.*
+*.env
+credentials.json
+*.pem
+*.key
+.credentials
