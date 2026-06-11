@@ -1,4 +1,5 @@
 """Weekly knowledge digest — data aggregation, HTML rendering, Resend delivery."""
+import html as html_lib
 import os
 from datetime import datetime, timezone
 
@@ -17,19 +18,19 @@ def render_digest_html(data: dict, app_url: str = "") -> str:
     """Inline-CSS, table-layout HTML email (zh-CN)."""
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     cats = " · ".join(
-        f"{CATEGORY_ZH.get(c, c)} {n}" for c, n in
+        f"{html_lib.escape(CATEGORY_ZH.get(c, str(c)))} {n}" for c, n in
         sorted(data["categories"].items(), key=lambda x: -x[1])[:5]
     ) or "—"
 
     rows = ""
     for it in data["items"]:
-        title = it.get("title_zh") or it.get("title_en") or "Untitled"
-        summary = (it.get("summary_zh") or "")[:160]
+        title = html_lib.escape(it.get("title_zh") or it.get("title_en") or "Untitled")
+        summary = html_lib.escape((it.get("summary_zh") or "")[:160])
         q = it.get("quality_score")
         q_str = f"{float(q):.1f}" if q is not None else "—"
         tags = " ".join(
             f'<span style="display:inline-block;border:1px solid #E4E4E7;border-radius:3px;'
-            f'padding:1px 6px;font-size:11px;color:#71717A;margin-right:4px;">{t}</span>'
+            f'padding:1px 6px;font-size:11px;color:#71717A;margin-right:4px;">{html_lib.escape(str(t))}</span>'
             for t in (it.get("tags") or [])[:4]
         )
         rows += f"""

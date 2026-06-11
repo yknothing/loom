@@ -23,13 +23,22 @@
 - [x] 测试：库 346 passed；测试代理后端 27/27、前端全流程通过
 - [x] 种子数据：4 篇 raw 文章 + 7 个 wiki 页面（7 节点 6 边图谱）
 
+## 第二阶段已完成（2026-06-11 下午）
+- [x] 定时调度（APScheduler/UTC）：每日 RSS 抓取 + 自动 Pipeline、每周简报推送；GET/PUT /api/schedule；下次运行时间展示
+- [x] Wiki 在线编辑：仅编辑正文、frontmatter 自动保留、updated 自动更新、log.md 审计记录
+- [x] 任务详情弹窗：完整结果（摘要/洞察/人物/标签）+ LLM 原始输出 + 错误信息；GET /api/tasks/{id}
+- [x] 每周知识简报（Resend）：HTML 邮件渲染（已做 html.escape 防注入）、预览弹窗、立即发送、收件人配置（留空=全体成员）；RESEND_API_KEY 未配置时优雅 400
+- [x] 域名变更适配：preview 域名改为 demo-to-prod-1.preview.emergentagent.com，FRONTEND_URL/CORS 已同步
+- [x] 测试代理第二轮：后端 38/38、前端全流程 100% 通过；346 库测试保持通过
+
 ## 已知阻塞
-- **EMERGENT_LLM_KEY 预算耗尽**（max $0.001）：LLM 编译调用返回 Budget exceeded（已验证优雅降级：任务标记 failed、事件流显示错误）。用户充值后在任务队列点"重试全部失败"+ 运行 Pipeline 即可
+- **EMERGENT_LLM_KEY 预算耗尽**（max $0.001，截至 2026-06-11 多次验证仍超限——用户提到"还有 5 credits"但 Key 侧未生效，可能需在 Profile → Universal Key 确认余额绑定到此 Key）。LLM 编译调用返回 Budget exceeded（已验证优雅降级）。恢复后：任务队列点"重试全部失败"→ 运行 Pipeline
+- **RESEND_API_KEY 未配置**：周报邮件发送返回 400 提示（预期行为）。在 https://resend.com/api-keys 获取 Key 填入 backend/.env 并重启后端即可启用
 
 ## Backlog
-- P0：用户充值后 E2E 验证 LLM 编译（4 个 pending/failed 种子任务）
-- P1：Pipeline 定时调度（cron 替代 → 后端 APScheduler）；Wiki 页面在线编辑；任务详情页（查看 LLM 原始输出/分段）
-- P2：Reflector/Curator/Digest 控制台入口；多 worker 时 Pipeline STATE 移入 DB；通知（编译完成/矛盾发现）；精确 token 计费（emergent 客户端目前为估算值）
+- P0：LLM Key 余额恢复后 E2E 验证编译（队列中有种子任务）；用户提供 RESEND_API_KEY 后实测邮件
+- P1：任务详情 raw_llm_response 截断提示；digest 收件人按 role 过滤/订阅字段
+- P2：Reflector/Curator 控制台入口；多 worker 时 Pipeline STATE 与调度器迁移外部 broker；通知；精确 token 计费（emergent 为估算）
 
 ## 凭据
 见 /app/memory/test_credentials.md（admin@loom.dev / LoomAdmin2026!）
