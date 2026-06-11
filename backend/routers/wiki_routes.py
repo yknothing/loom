@@ -2,11 +2,26 @@
 import asyncio
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
 
 import loom_bridge as bridge
 from auth import get_current_user
 
 router = APIRouter(prefix="/wiki", tags=["wiki"])
+
+
+class PageEditBody(BaseModel):
+    path: str = Field(min_length=1)
+    body: str = Field(min_length=1)
+
+
+@router.put("/page")
+async def edit_page(payload: PageEditBody, user: dict = Depends(get_current_user)):
+    ok = await asyncio.to_thread(
+        bridge.update_wiki_page, payload.path, payload.body, user["email"])
+    if not ok:
+        raise HTTPException(status_code=404, detail="页面不存在")
+    return {"ok": True}
 
 
 @router.get("/tree")

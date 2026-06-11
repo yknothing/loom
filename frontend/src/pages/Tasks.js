@@ -3,6 +3,7 @@ import { RotateCcw, FolderSync } from "lucide-react";
 import { toast } from "sonner";
 import api, { errText } from "../lib/api";
 import { Button, Card, EmptyState, Input, PageHeader, StatusBadge } from "../components/ui";
+import TaskDetailModal from "../components/TaskDetailModal";
 
 const FILTERS = [
   { key: "", label: "全部" },
@@ -20,6 +21,7 @@ export default function Tasks() {
   const [page, setPage] = useState(0);
   const [data, setData] = useState({ total: 0, items: [] });
   const [loading, setLoading] = useState(true);
+  const [detailId, setDetailId] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -129,7 +131,12 @@ export default function Tasks() {
           </thead>
           <tbody data-testid="tasks-table-body">
             {data.items.map((t) => (
-              <tr key={t.id} className="border-b border-line last:border-0 hover:bg-surface/60">
+              <tr
+                key={t.id}
+                className="border-b border-line last:border-0 hover:bg-surface/60 cursor-pointer"
+                onClick={() => setDetailId(t.id)}
+                data-testid={`task-row-${t.id}`}
+              >
                 <td className="px-4 py-2.5 font-mono text-xs text-muted">{t.id}</td>
                 <td className="px-4 py-2.5 max-w-[320px]">
                   <div className="truncate font-medium">{t.filename}</div>
@@ -150,7 +157,15 @@ export default function Tasks() {
                 <td className="px-4 py-2.5 text-xs text-muted">{t.completed_at || "—"}</td>
                 <td className="px-4 py-2.5">
                   {(t.status === "failed" || t.status === "rejected") && (
-                    <Button variant="ghost" className="!px-2 !py-1 text-xs" onClick={() => retry(t.id)} data-testid={`retry-task-${t.id}`}>
+                    <Button
+                      variant="ghost"
+                      className="!px-2 !py-1 text-xs"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        retry(t.id);
+                      }}
+                      data-testid={`retry-task-${t.id}`}
+                    >
                       <RotateCcw className="w-3.5 h-3.5" /> 重试
                     </Button>
                   )}
@@ -175,6 +190,8 @@ export default function Tasks() {
           </Button>
         </div>
       )}
+
+      <TaskDetailModal taskId={detailId} onClose={() => setDetailId(null)} />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { KeyRound, Rss, Save, DownloadCloud, Trash2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import api, { errText } from "../lib/api";
 import { Badge, Button, Card, Input, PageHeader, Select, Spinner } from "../components/ui";
+import SettingsAutomation from "../components/SettingsAutomation";
 
 export default function Settings() {
   const [settings, setSettings] = useState(null);
@@ -219,6 +220,8 @@ export default function Settings() {
           </pre>
         )}
       </Card>
+
+      <SettingsAutomation />
     </div>
   );
 }

@@ -629,6 +629,97 @@ def review_stats() -> dict:
     return rq.get_stats()
 
 
+# ────────────────────────────── Digest ──────────────────────────────
+
+def digest_data(days: int = 7) -> dict:
+    """Aggregate the last N days of compiled knowledge for the weekly digest."""
+    q = _q()
+    try:
+        rows = q._conn.execute(
+            """SELECT title_zh, title_en, summary_zh, category,
+                      quality_score, tags, created_at
+               FROM ingest_results
+               WHERE created_at >= datetime('now', ?)
+               ORDER BY quality_score DESC, id DESC""",
+            (f"-{days} days",)).fetchall()
+        items = []
+        cats = {}
+        for r in rows:
+            d = dict(r)
+            try:
+                d["tags"] = json.loads(d.get("tags") or "[]")
+            except Exception:
+                d["tags"] = []
+            cats[d.get("category") or "other"] = cats.get(d.get("category") or "other", 0) + 1
+            items.append(d)
+        tok = q._conn.execute(
+            """SELECT COALESCE(SUM(input_tokens + output_tokens), 0) t
+               FROM ingest_tasks
+               WHERE status = 'done' AND completed_at >= datetime('now', ?)""",
+            (f"-{days} days",)).fetchone()["t"]
+        review_pending = sum(v.get("pending", 0) for v in rq.get_stats().values())
+        return {
+            "items": items[:10],
+            "total": len(items),
+            "categories": cats,
+            "tokens": tok,
+            "review_pending": review_pending,
+        }
+    finally:
+        q.close()
+
+
+# ────────────────────────────── Task detail ──────────────────────────────
+
+def get_task_detail(task_id: int) -> dict:
+    q = _q()
+    try:
+        t = q._conn.execute(
+            "SELECT * FROM ingest_tasks WHERE id = ?", (task_id,)).fetchone()
+        if not t:
+            return None
+        task = dict(t)
+        task["filename"] = Path(task["filepath"]).name
+        r = q._conn.execute(
+            """SELECT * FROM ingest_results WHERE task_id = ?
+               ORDER BY id DESC LIMIT 1""", (task_id,)).fetchone()
+        result = None
+        if r:
+            result = dict(r)
+            for k in ("tags", "people", "orgs", "key_insights", "related_topics"):
+                try:
+                    result[k] = json.loads(result.get(k) or "[]")
+                except Exception:
+                    result[k] = []
+            result["raw_llm_response"] = (result.get("raw_llm_response") or "")[:20000]
+            result.pop("segments_json", None)
+        return {"task": task, "result": result}
+    finally:
+        q.close()
+
+
+# ────────────────────────────── Wiki editing ──────────────────────────────
+
+def update_wiki_page(rel_path: str, body: str, editor: str = "") -> bool:
+    """Overwrite a wiki page body, preserving frontmatter and bumping `updated`."""
+    rel_path = rel_path.strip("/").replace("..", "")
+    p = wiki_dir() / f"{rel_path}.md"
+    if not p.exists():
+        return False
+    meta, _ = _read_page_file(p)
+    meta["updated"] = date.today().isoformat()
+    from ingest.wiki_writer import write_page
+    write_page(p, meta, body.strip())
+    # Append-only audit entry
+    try:
+        with open(wiki_dir() / "log.md", "a", encoding="utf-8") as f:
+            f.write(f"\n## [{date.today().isoformat()}] manual-edit | {rel_path}\n"
+                    f"编辑者: {editor}\n")
+    except Exception:
+        pass
+    return True
+
+
 # ────────────────────────────── Providers ──────────────────────────────
 
 def providers_info() -> dict:

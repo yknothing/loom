@@ -105,6 +105,14 @@ async def tasks(status: str = None, search: str = None,
                                    min(limit, 200), offset)
 
 
+@router.get("/tasks/{task_id}")
+async def task_detail(task_id: int, user: dict = Depends(get_current_user)):
+    detail = await asyncio.to_thread(bridge.get_task_detail, task_id)
+    if detail is None:
+        raise HTTPException(status_code=404, detail="任务不存在")
+    return detail
+
+
 @router.post("/tasks/{task_id}/retry")
 async def retry(task_id: int, user: dict = Depends(get_current_user)):
     ok = await asyncio.to_thread(bridge.retry_task, task_id)

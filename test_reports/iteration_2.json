@@ -1,0 +1,57 @@
+{
+  "summary": "Phase-2 testing for Loom Console (定时调度 / Wiki 编辑 / 任务详情 / 每周简报). Backend: 38/38 pytest pass (27 regression from iteration_1 + 11 new phase-2). Frontend: all targeted flows verified end-to-end on the new preview domain (demo-to-prod-1).",
+  "backend_results": {
+    "regression_iteration_1": "27/27 pass (auth, dashboard, tasks, wiki, content, sources, settings, pipeline)",
+    "phase_2": {
+      "AuthGate": "GET /api/schedule, /api/digest/preview and POST /api/digest/send all return 401 without cookie",
+      "TaskDetail": "GET /api/tasks/{id} returns task+result with id/filepath/status/retry_count/input_tokens/output_tokens; missing id returns 404 with '任务不存在'",
+      "WikiEdit": "PUT /api/wiki/page on missing path returns 404; on existing path saves successfully, preserves frontmatter and bumps `updated` to today; body change persisted to /app/wiki/{path}.md (restored after test)",
+      "Schedule": "GET /api/schedule shape includes rss_enabled/rss_hour/digest_enabled/digest_weekday/digest_hour/jobs/email_configured. email_configured=false confirms RESEND_API_KEY empty. Enable→jobs.rss_job and jobs.digest_job both non-null (next_run_time set); Disable→both null.",
+      "Digest": "GET /api/digest/preview returns {html, data} with total/categories/tokens/review_pending/items; html contains LOOM, 每周知识简报, 本周编译文章. POST /api/digest/send returns 400 with detail containing 'RESEND_API_KEY' (expected per spec)."
+    }
+  },
+  "frontend_results": {
+    "login_dashboard_smoke": "admin login → / renders 6 stat cards + Pipeline 控制 + 近 14 日处理活动 + 分类分布; no console errors",
+    "task_detail_modal": "Tasks page lists 9 rows; row click opens [data-testid=task-detail-modal] showing '原始文件' label, model/token/retry rows; close-task-detail dismisses modal",
+    "wiki_edit": "edit-page-btn opens wiki-edit-textarea with frontmatter STRIPPED (clean body only). cancel-edit-btn hides editor. save-page-btn shows toast '页面已保存（已记录到操作日志）'. Body restored to original after test.",
+    "automation_settings": "schedule-rss-enabled & digest-enabled toggles + schedule-rss-hour & digest-hour inputs work. save-automation-btn produces '自动化设置已保存' toast and next-run text '下次 RSS 任务: 2026-06-12 06:00 UTC' appears.",
+    "resend_badge": "需配置 RESEND_API_KEY amber badge visible on 每周知识简报 card (matches backend email_configured=false)",
+    "digest_preview": "digest-preview-btn opens digest-preview-modal containing iframe; iframe body contains LOOM, 简报, 本周 (HTML rendered correctly)",
+    "digest_send_expected_error": "digest-send-btn triggers 400 and toast '未配置 RESEND_API_KEY — 请在 backend/.env 中设置后重启后端' (EXPECTED per spec)",
+    "disable_schedule": "Unchecking both toggles + save → no errors"
+  },
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Settings 自动化卡片", "issues": ["「下次 RSS 任务」在表单未保存前显示 '未启用' / 启用后显示具体时间，符合预期；但「下次发送」字段仅在 last_digest_sent 存在时显示——首次启用 digest 时用户看不到下次运行时间，建议把 jobs.digest_job 的时间放到独立行（非阻断式建议）。"]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/backend/tests/test_phase2.py",
+    "/app/test_reports/pytest/pytest_results.xml",
+    "/app/test_reports/pytest/phase2_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "automation_routes.py 把 RESEND 未配置同时映射到 RuntimeError→400 和 send 失败→502，分层合理。",
+    "scheduler.apply_schedule 在 PUT 之前移除已有 job，幂等。",
+    "scheduler 全局单例（AsyncIOScheduler tz=UTC），与多实例后端不兼容——单机 MVP 可接受，未来横向扩缩需迁移到外部 broker（redis/celery beat）。",
+    "loom_bridge.update_wiki_page 写入前会 `body.strip()`——若用户故意保留尾部空行将被吃掉；不属于 bug，但应在 UI 说明。",
+    "digest_recipients 在 admin 留空时枚举全体注册用户（含 test_*@example.com 测试账号）；生产前建议加 'role=member' 过滤或显式订阅字段。",
+    "render_digest_html 使用 f-string 内嵌 HTML，未对 title/summary/tag 做 HTML 转义——若结果含 LLM 输出带 `<script>` 会被 email 渲染。建议 html.escape() 一次。",
+    "TaskDetailModal: 任务为 pending/queued 时 input_tokens=0+output_tokens=0 显示 '—' 正常；但 r.raw_llm_response 在前端按 20000 字截断，建议加 '..已截断' 提示。"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_phase2.py (new)"
+  ],
+  "success_rate": {"backend": "100% (38/38)", "frontend": "100% of phase-2 flows"},
+  "test_credentials": "admin@loom.dev / LoomAdmin2026!",
+  "seed_data_creation": "Wiki edit test appends a marker (<!-- TEST_EDIT_… --> / <!-- ui-test -->) and then restores the original body in the same test — 没有种子污染。Schedule on/off 状态恢复为关闭（与 phase-2 初始状态一致）。",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Pytest layout: /app/backend/tests/backend_test.py (regression) + /app/backend/tests/test_phase2.py (new). Run both with: pytest /app/backend/tests/ -v --junitxml=/app/test_reports/pytest/pytest_results.xml. EMERGENT_LLM_KEY 仍预算耗尽（pipeline 任务 0-token 是正常）。RESEND_API_KEY 故意为空——digest/send 返回 400 是 spec。前端 login 后 URL 是 / 不是 /dashboard，写 playwright 时不要等 **/dashboard**。",
+  "rca of the issue": "N/A — no bugs found."
+}

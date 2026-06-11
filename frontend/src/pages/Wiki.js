@@ -2,9 +2,10 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ChevronDown, ChevronRight, Link2 } from "lucide-react";
-import api from "../lib/api";
-import { Badge, Card, EmptyState, PageHeader, Spinner } from "../components/ui";
+import { ChevronDown, ChevronRight, Link2, Pencil } from "lucide-react";
+import { toast } from "sonner";
+import api, { errText } from "../lib/api";
+import { Badge, Button, Card, EmptyState, PageHeader, Spinner, Textarea } from "../components/ui";
 
 const SECTION_LABELS = {
   ideas: "概念",
@@ -35,6 +36,9 @@ export default function Wiki() {
   const [page, setPage] = useState(null);
   const [pageLoading, setPageLoading] = useState(false);
   const [open, setOpen] = useState({ ideas: true, people: true });
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     api
@@ -47,6 +51,7 @@ export default function Wiki() {
   }, []);
 
   useEffect(() => {
+    setEditing(false);
     if (!activePath) {
       setPage(null);
       return;
@@ -60,6 +65,26 @@ export default function Wiki() {
   }, [activePath]);
 
   const openPage = (path) => setParams({ page: normalizeTarget(path) });
+
+  const startEdit = () => {
+    setDraft(page.body);
+    setEditing(true);
+  };
+
+  const saveEdit = async () => {
+    setSaving(true);
+    try {
+      await api.put("/wiki/page", { path: page.path, body: draft });
+      toast.success("页面已保存（已记录到操作日志）");
+      setEditing(false);
+      const { data } = await api.get("/wiki/page", { params: { path: page.path } });
+      setPage(data);
+    } catch (e) {
+      toast.error(errText(e));
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const processedBody = useMemo(() => (page ? preprocessWikilinks(page.body) : ""), [page]);
 
@@ -116,35 +141,63 @@ export default function Wiki() {
             <EmptyState title="选择左侧页面开始阅读" sub="知识页面由 LLM Pipeline 自动创建和更新" />
           ) : (
             <div>
-              <div className="flex flex-wrap gap-1.5 mb-4">
+              <div className="flex flex-wrap gap-1.5 mb-4 items-center">
                 {page.meta.category && <Badge className="!bg-primary/10 !text-primary !border-primary/20">{page.meta.category}</Badge>}
                 {(Array.isArray(page.meta.tags) ? page.meta.tags : []).slice(0, 8).map((t) => (
                   <Badge key={t}>{t}</Badge>
                 ))}
-                {page.meta.updated && <span className="text-xs text-muted ml-auto">更新于 {page.meta.updated}</span>}
+                <span className="ml-auto flex items-center gap-3">
+                  {page.meta.updated && <span className="text-xs text-muted">更新于 {page.meta.updated}</span>}
+                  {!editing && (
+                    <Button variant="outline" className="!px-2.5 !py-1 text-xs" onClick={startEdit} data-testid="edit-page-btn">
+                      <Pencil className="w-3.5 h-3.5" /> 编辑
+                    </Button>
+                  )}
+                </span>
               </div>
-              <article className="prose prose-zinc prose-loom max-w-none prose-headings:tracking-tight">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  components={{
-                    a: ({ href, children }) =>
-                      href && href.startsWith("wikilink:") ? (
-                        <button
-                          onClick={() => openPage(href.slice("wikilink:".length))}
-                          className="text-primary font-medium hover:underline inline"
-                        >
-                          {children}
-                        </button>
-                      ) : (
-                        <a href={href} target="_blank" rel="noreferrer">
-                          {children}
-                        </a>
-                      ),
-                  }}
-                >
-                  {processedBody}
-                </ReactMarkdown>
-              </article>
+              {editing ? (
+                <div data-testid="wiki-editor">
+                  <Textarea
+                    data-testid="wiki-edit-textarea"
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    rows={24}
+                    className="font-mono !text-xs leading-relaxed"
+                  />
+                  <div className="flex gap-2 mt-3">
+                    <Button onClick={saveEdit} disabled={saving} data-testid="save-page-btn">
+                      {saving ? "保存中…" : "保存"}
+                    </Button>
+                    <Button variant="outline" onClick={() => setEditing(false)} data-testid="cancel-edit-btn">
+                      取消
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted mt-2">仅编辑正文，frontmatter 元数据会自动保留，`updated` 日期自动更新。</p>
+                </div>
+              ) : (
+                <article className="prose prose-zinc prose-loom max-w-none prose-headings:tracking-tight">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      a: ({ href, children }) =>
+                        href && href.startsWith("wikilink:") ? (
+                          <button
+                            onClick={() => openPage(href.slice("wikilink:".length))}
+                            className="text-primary font-medium hover:underline inline"
+                          >
+                            {children}
+                          </button>
+                        ) : (
+                          <a href={href} target="_blank" rel="noreferrer">
+                            {children}
+                          </a>
+                        ),
+                    }}
+                  >
+                    {processedBody}
+                  </ReactMarkdown>
+                </article>
+              )}
               {page.backlinks.length > 0 && (
                 <div className="mt-10 pt-6 border-t border-line">
                   <div className="label-xs mb-3 flex items-center gap-1.5">
