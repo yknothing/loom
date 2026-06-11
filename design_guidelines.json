@@ -1,0 +1,94 @@
+{
+  "theme": "Light",
+  "archetype": "Archetype 4: Swiss & High-Contrast",
+  "reasoning": "Loom is a data-dense LLM compilation pipeline and knowledge management dashboard. It requires authority, clarity, and a function-first design. The Swiss archetype provides an objective, rigid, and structural layout where color is used purely to guide action, avoiding decorative distraction.",
+  "typography": {
+    "font_family": {
+      "headings": "'IBM Plex Sans', 'Noto Sans SC', sans-serif",
+      "body": "'IBM Plex Sans', 'Noto Sans SC', sans-serif",
+      "mono": "'IBM Plex Mono', 'Courier New', monospace"
+    },
+    "scale": {
+      "h1": "text-4xl sm:text-5xl tracking-tight font-bold",
+      "h2": "text-2xl sm:text-3xl tracking-tight font-bold",
+      "h3": "text-xl sm:text-2xl tracking-tight font-semibold",
+      "h4": "text-lg sm:text-xl font-medium",
+      "body": "text-base leading-relaxed",
+      "small": "text-sm",
+      "label": "text-xs tracking-[0.2em] uppercase"
+    }
+  },
+  "colors": {
+    "background": "#FFFFFF",
+    "surface": "#F4F4F5",
+    "surface_glass": "rgba(255, 255, 255, 0.7)",
+    "primary": "#002FA7",
+    "primary_hover": "#00227A",
+    "text_primary": "#09090B",
+    "text_secondary": "#71717A",
+    "border": "#E4E4E7",
+    "success": "#16A34A",
+    "error": "#DC2626",
+    "warning": "#D97706"
+  },
+  "spacing_and_layout": {
+    "philosophy": "Generous internal padding for cards to avoid collision. Dense grid layout for dashboards to correlate data.",
+    "dashboard_grid": "grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6",
+    "card_padding": "p-6",
+    "border_radius": "rounded-md",
+    "alignment": "Left-align dense content. Optical alignment over geometric."
+  },
+  "surface_strategies": {
+    "headers": "Crystal Glass: backdrop-blur-xl bg-white/70, 1px delicate inner stroke border-zinc-200, shadow-sm.",
+    "dashboard_cards": "Grid Borders/Technical Look: Flat background, 1px subtle border border-zinc-200, no shadow. Hover: -translate-y-1, shadow-md, border-zinc-300.",
+    "buttons": "Flat solid: Sharp inner contrasts, primary color bg, white text. No soft shadows."
+  },
+  "motion_and_interactions": {
+    "hover_states": "Explicitly set text color on hover. Slight lift for interactive cards.",
+    "transitions": "transition: transform 0.2s ease, opacity 0.2s ease, border-color 0.2s ease",
+    "focus_states": "High contrast ring focus:ring-2 focus:ring-[#002FA7] focus:ring-offset-2"
+  },
+  "component_instructions": {
+    "general": "Use Shadcn/UI for tables, calendars, dropdowns, dialogs, cards, tabs. Keep aesthetics structural and card edges sharp (max 6px).",
+    "knowledge_graph": "Use 'react-force-graph-2d' or 'react-force-graph-3d' for the concept relation network. Implement progressive disclosure: start with a simplified view, use a hybrid layout with the main graph canvas taking up majority space, and a right-side sliding detail panel for node inspection.",
+    "markdown_wiki": "Use 'react-markdown' with 'remark-gfm'. Style typography elegantly with Tailwind Typography (prose prose-zinc) but override link colors to use the primary #002FA7.",
+    "charts": "Use Shadcn chart components (Recharts) for task queue stats, success/failure rates, and token usage metrics.",
+    "tables": "Dense rows for pipeline monitoring (Task Queue). Explicit status badges."
+  },
+  "icons_and_assets": {
+    "icon_library": "lucide-react",
+    "image_urls": {
+      "login_background": {
+        "url": "https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTZ8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMG1pbmltYWwlMjBnZW9tZXRyaWN8ZW58MHx8fHwxNzgxMTU5NjE1fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Abstract blue and white round geometric pattern. Use as a decorative sidebar or background element on the Login page.",
+        "category": "auth_background"
+      },
+      "empty_state_graph": {
+        "url": "https://images.unsplash.com/photo-1762279389083-abf71f22d338?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODF8MHwxfHNlYXJjaHwyfHxkYXRhJTIwbmV0d29yayUyMGdyYXBofGVufDB8fHx8MTc4MTE1OTYxNXww&ixlib=rb-4.1.0&q=85",
+        "description": "Abstract lines and graphs. Use for empty states of the knowledge graph or pipeline dashboard.",
+        "category": "empty_state"
+      }
+    }
+  },
+  "accessibility_and_testing": {
+    "contrast": "Ensure text meets APCA/WCAG AA standards. Tinted greys must remain accessible.",
+    "testing": "All interactive elements (buttons, links, inputs, tabs) MUST have data-testid attributes (e.g., data-testid='submit-article-btn')."
+  },
+  "localization": {
+    "language": "zh-CN",
+    "instruction": "All UI copy, placeholders, menus, and tooltips MUST be in Simplified Chinese (zh-CN)."
+  },
+  "instructions_to_main_agent": [
+    "Scaffold the React/Tailwind frontend project if it does not already exist.",
+    "Install 'lucide-react' for icons.",
+    "Install 'react-force-graph-2d' (preferred for readable text nodes) for the Knowledge Graph Visualizer.",
+    "Install 'react-markdown' and 'remark-gfm' for the Wiki Knowledge Base Browser.",
+    "Implement Shadcn/UI for tables, buttons, inputs, tabs, and charts.",
+    "Ensure the UI uses the Swiss High-Contrast aesthetic: heavily structural, rigid grids, 1px borders, white/zinc background, with International Klein Blue (#002FA7) strictly for actions.",
+    "Implement the 'Control Room' grid for the pipeline monitoring dashboard.",
+    "For the knowledge graph, implement a hybrid layout: main canvas on the left/center, right-side sliding detail panel for node inspection.",
+    "Ensure all text is in zh-CN (Chinese) as per user choice.",
+    "Add 'data-testid' to all actionable elements.",
+    "Implement JWT-based Login (small team multi-user) using the provided geometry image for the auth split-screen background."
+  ]
+}
