@@ -37,7 +37,13 @@ export default function Wiki() {
   const [open, setOpen] = useState({ ideas: true, people: true });
 
   useEffect(() => {
-    api.get("/wiki/tree").then((r) => setTree(r.data)).catch(() => setTree({}));
+    api
+      .get("/wiki/tree")
+      .then((r) => {
+        setTree(r.data);
+        setOpen(Object.fromEntries(Object.keys(r.data).map((k) => [k, true])));
+      })
+      .catch(() => setTree({}));
   }, []);
 
   useEffect(() => {

@@ -29,7 +29,8 @@ DEFAULT_WIKI_DIR = wiki_dir()
 SCAN_SUBDIRS = ["ideas", "people", "mental-models"]
 
 # Section headers that contain claims/opinions
-CLAIM_SECTIONS = {"核心观点", "核心思想", "详细内容", "争议", "局限与挑战", "观点演变"}
+CLAIM_SECTIONS = {"核心观点", "核心思想", "核心洞察", "深度摘要", "详细内容",
+                  "争议", "局限与挑战", "观点演变"}
 
 # ── Antonym pairs for contradiction detection ──────────────────────────────
 # Each tuple: (positive_pattern, negative_pattern, tension_label)

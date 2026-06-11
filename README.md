@@ -1,6 +1,6 @@
-# Loom — LLM 知识编译 Pipeline
+# Loom — LLM 知识编译 Pipeline + Web 控制台
 
-将原始资料转化为结构化知识库的自动化引擎。
+将原始资料转化为结构化知识库的自动化引擎，附带生产级 Web 控制台（FastAPI + React）。
 
 ## 设计原则
 
