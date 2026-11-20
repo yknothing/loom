@@ -67,7 +67,7 @@ def tmp_queue(tmp_path, monkeypatch):
     return p
 
 
-def _sample_result(filepath="/Users/th/project/raw/rss/2026-05-30-test.md", **overrides):
+def _sample_result(filepath="/Users/example/project/raw/rss/2026-05-30-test.md", **overrides):
     """Build a sample ingest result dict."""
     base = {
         "_filepath": filepath,
@@ -137,7 +137,7 @@ class TestMergeOnHighSimilarity:
                 title_en="RLHF Overview",
                 title_zh="RLHF概述",
                 tags=["rlhf", "alignment"],
-                filepath="/Users/th/project/raw/rss/2026-06-01-rlhf.md",
+                filepath="/Users/example/project/raw/rss/2026-06-01-rlhf.md",
             ))
 
         # Should NOT create a new file; should update existing
@@ -169,7 +169,7 @@ class TestMergePreservesContent:
             write_ingest_result(_sample_result(
                 title_en="Transformer Architecture",
                 tags=["ai", "transformer"],
-                filepath="/Users/th/project/raw/rss/2026-06-01-transformer.md",
+                filepath="/Users/example/project/raw/rss/2026-06-01-transformer.md",
             ))
 
         _, body = read_page(wiki_env / "ideas" / "transformer.md")
@@ -186,7 +186,7 @@ class TestMergePreservesContent:
             write_ingest_result(_sample_result(
                 title_en="Test Idea",
                 tags=["test"],
-                filepath="/Users/th/project/raw/rss/2026-06-01-test.md",
+                filepath="/Users/example/project/raw/rss/2026-06-01-test.md",
             ))
 
         meta, _ = read_page(wiki_env / "ideas" / "test-idea.md")
@@ -201,7 +201,7 @@ class TestMergePreservesContent:
             write_ingest_result(_sample_result(
                 title_en="My Original Topic",
                 tags=["topic"],
-                filepath="/Users/th/project/raw/rss/2026-06-01-topic.md",
+                filepath="/Users/example/project/raw/rss/2026-06-01-topic.md",
             ))
 
         meta, _ = read_page(wiki_env / "ideas" / "my-topic.md")
@@ -223,7 +223,7 @@ class TestMergeInsightsNoDuplicates:
                 title_en="Deep Learning",
                 tags=["ai", "deep-learning"],
                 key_insights=["New insight C", "New insight D"],
-                filepath="/Users/th/project/raw/rss/2026-06-01-dl.md",
+                filepath="/Users/example/project/raw/rss/2026-06-01-dl.md",
             ))
 
         _, body = read_page(wiki_env / "ideas" / "deep-learning.md")
@@ -244,7 +244,7 @@ class TestMergeInsightsNoDuplicates:
                 title_en="ML Basics",
                 tags=["ml"],
                 key_insights=["Insight Alpha", "Insight Beta"],
-                filepath="/Users/th/project/raw/rss/2026-06-01-ml.md",
+                filepath="/Users/example/project/raw/rss/2026-06-01-ml.md",
             ))
 
         _, body = read_page(wiki_env / "ideas" / "ml-basics.md")
@@ -266,7 +266,7 @@ class TestMergeFrontmatter:
             write_ingest_result(_sample_result(
                 title_en="GPT-4",
                 tags=["ai", "llm"],
-                filepath="/Users/th/project/raw/rss/2026-06-01-gpt4.md",
+                filepath="/Users/example/project/raw/rss/2026-06-01-gpt4.md",
             ))
 
         meta, _ = read_page(wiki_env / "ideas" / "gpt-4.md")
@@ -283,7 +283,7 @@ class TestMergeFrontmatter:
             write_ingest_result(_sample_result(
                 title_en="Scaling Laws",
                 tags=["scaling", "ai"],
-                filepath="/Users/th/project/raw/rss/2026-06-01-scaling.md",
+                filepath="/Users/example/project/raw/rss/2026-06-01-scaling.md",
             ))
 
         meta, _ = read_page(wiki_env / "ideas" / "scaling.md")
@@ -298,7 +298,7 @@ class TestMergeFrontmatter:
             write_ingest_result(_sample_result(
                 title_en="Topic X",
                 tags=["tag-b", "tag-c"],
-                filepath="/Users/th/project/raw/rss/2026-06-01-topic.md",
+                filepath="/Users/example/project/raw/rss/2026-06-01-topic.md",
             ))
 
         # Use list-aware parser since tags are stored as YAML list
@@ -319,7 +319,7 @@ class TestMergeFrontmatter:
             write_ingest_result(_sample_result(
                 title_en="Source Test",
                 tags=["test"],
-                filepath="/Users/th/project/raw/rss/2026-06-01-new.md",
+                filepath="/Users/example/project/raw/rss/2026-06-01-new.md",
             ))
 
         meta, _ = read_page(wiki_env / "ideas" / "source-test.md")
@@ -341,7 +341,7 @@ class TestMultipleMerges:
                     title_en="Multi Merge Topic",
                     tags=["multi"],
                     key_insights=[f"Insight from merge {i+1}"],
-                    filepath=f"/Users/th/project/raw/rss/2026-06-0{i+1}-merge.md",
+                    filepath=f"/Users/example/project/raw/rss/2026-06-0{i+1}-merge.md",
                 ))
 
         meta, body = read_page(wiki_env / "ideas" / "multi-merge.md")
@@ -361,13 +361,13 @@ class TestMultipleMerges:
                 title_en="Accumulation Test",
                 tags=["accum"],
                 key_insights=["First merge insight"],
-                filepath="/Users/th/project/raw/rss/2026-06-01-accum.md",
+                filepath="/Users/example/project/raw/rss/2026-06-01-accum.md",
             ))
             write_ingest_result(_sample_result(
                 title_en="Accumulation Test",
                 tags=["accum"],
                 key_insights=["Second merge insight"],
-                filepath="/Users/th/project/raw/rss/2026-06-02-accum.md",
+                filepath="/Users/example/project/raw/rss/2026-06-02-accum.md",
             ))
 
         _, body = read_page(wiki_env / "ideas" / "accum.md")
@@ -388,7 +388,7 @@ class TestReviewQueueIntegration:
             write_ingest_result(_sample_result(
                 title_en="Review Test Topic",
                 tags=["review"],
-                filepath="/Users/th/project/raw/rss/2026-06-01-review.md",
+                filepath="/Users/example/project/raw/rss/2026-06-01-review.md",
             ))
 
         # Check review queue
@@ -486,7 +486,7 @@ class TestEndToEndPipeline:
                 title_en="AI Safety Alignment",
                 tags=["ai-safety", "alignment"],
                 key_insights=["Alignment is critical for advanced AI"],
-                filepath="/Users/th/project/raw/rss/2026-06-01-safety.md",
+                filepath="/Users/example/project/raw/rss/2026-06-01-safety.md",
             ))
 
         # Verify page created
@@ -499,7 +499,7 @@ class TestEndToEndPipeline:
                 title_en="AI Safety Alignment",
                 tags=["ai-safety", "alignment"],
                 key_insights=["New research on interpretability"],
-                filepath="/Users/th/project/raw/rss/2026-06-02-safety.md",
+                filepath="/Users/example/project/raw/rss/2026-06-02-safety.md",
             ))
 
         # Verify merged (not two separate pages)
@@ -524,12 +524,12 @@ class TestEndToEndPipeline:
             write_ingest_result(_sample_result(
                 title_en="Neural Network Optimization",
                 tags=["neural-networks", "optimization"],
-                filepath="/Users/th/project/raw/rss/2026-06-01-nn.md",
+                filepath="/Users/example/project/raw/rss/2026-06-01-nn.md",
             ))
             write_ingest_result(_sample_result(
                 title_en="Neural Network Optimization Techniques",
                 tags=["neural-networks", "optimization"],
-                filepath="/Users/th/project/raw/rss/2026-06-02-nn.md",
+                filepath="/Users/example/project/raw/rss/2026-06-02-nn.md",
             ))
 
         # Run duplicate detection
@@ -547,17 +547,17 @@ class TestExistingBehaviorUnchanged:
             write_ingest_result(_sample_result(
                 title_en="Sourdough Bread Making",
                 tags=["cooking", "bread"],
-                filepath="/Users/th/project/raw/rss/2026-06-01-bread.md",
+                filepath="/Users/example/project/raw/rss/2026-06-01-bread.md",
             ))
             write_ingest_result(_sample_result(
                 title_en="Quantum Entanglement",
                 tags=["quantum", "physics"],
-                filepath="/Users/th/project/raw/rss/2026-06-01-quantum.md",
+                filepath="/Users/example/project/raw/rss/2026-06-01-quantum.md",
             ))
             write_ingest_result(_sample_result(
                 title_en="Rust Programming Language",
                 tags=["rust", "programming"],
-                filepath="/Users/th/project/raw/rss/2026-06-01-rust.md",
+                filepath="/Users/example/project/raw/rss/2026-06-01-rust.md",
             ))
 
         ideas = list((wiki_env / "ideas").glob("*.md"))
@@ -585,7 +585,7 @@ class TestExistingBehaviorUnchanged:
                 title_en="Test Topic",
                 tags=["test"],
                 people=[{"name": "Jane Doe", "role": "Scientist"}],
-                filepath="/Users/th/project/raw/rss/2026-06-01-topic.md",
+                filepath="/Users/example/project/raw/rss/2026-06-01-topic.md",
             ))
 
         # People page should still be created

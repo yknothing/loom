@@ -23,7 +23,7 @@ MAX_MERGE_BODY_LENGTH = 5000  # chars — truncate older insights beyond this
 def _to_vault_rel(abs_path: str) -> str:
     """Convert an absolute raw-file path to a vault-relative path for Obsidian.
 
-    e.g. /Users/th/.../cognitive-flywheel/raw/rss/2026-04-01-say-the-thing-you-want.md
+    e.g. /Users/example/.../cognitive-flywheel/raw/rss/2026-04-01-say-the-thing-you-want.md
          → raw/rss/2026-04-01-say-the-thing-you-want
     """
     p = Path(abs_path)

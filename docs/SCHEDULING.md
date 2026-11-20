@@ -32,7 +32,7 @@ Use OpenClaw's built-in cron system. It runs tasks as agent turns, which means:
 **Agent prompt**:
 
 ```
-Run the Cognitive Flywheel morning pipeline. Working directory: /Users/th/.openclaw/workspace-leader/cognitive-flywheel/
+Run the Cognitive Flywheel morning pipeline. Working directory: ~/.openclaw/workspace-leader/cognitive-flywheel/
 
 Steps:
 1. Run `bash scripts/full-pipeline.sh` — this does: RSS fetch → enqueue → LLM ingest → vault sync → digest
@@ -64,7 +64,7 @@ If the pipeline fails, report which step failed and the error. Do NOT retry auto
 **Agent prompt**:
 
 ```
-Run the Cognitive Flywheel evening prefetch. Working directory: /Users/th/.openclaw/workspace-leader/cognitive-flywheel/
+Run the Cognitive Flywheel evening prefetch. Working directory: ~/.openclaw/workspace-leader/cognitive-flywheel/
 
 Steps:
 1. Run `python3 scripts/rss-fetch.py --timeout 20`

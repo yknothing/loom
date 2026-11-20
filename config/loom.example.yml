@@ -3,16 +3,16 @@
 
 # Data directories (TechLoom repo)
 data:
-  raw_dir: /Users/th/GitHub/TechLoom/raw
-  wiki_dir: /Users/th/GitHub/TechLoom/wiki
-  data_dir: /Users/th/GitHub/TechLoom/data
-  config_dir: /Users/th/GitHub/TechLoom/config
+  raw_dir: /path/to/TechLoom/raw
+  wiki_dir: /path/to/TechLoom/wiki
+  data_dir: /path/to/TechLoom/data
+  config_dir: /path/to/TechLoom/config
 
 # Database
-db_path: /Users/th/GitHub/TechLoom/data/task-queue.db
+db_path: /path/to/TechLoom/data/task-queue.db
 
 # Logs
-log_dir: /Users/th/GitHub/TechLoom/logs
+log_dir: /path/to/TechLoom/logs
 
 # Optional: Obsidian vault sync
 # obsidian_vault: /Volumes/t7_shield/ObsidianVault/llmwiki
