@@ -1,6 +1,6 @@
 #!/bin/bash
 # Sync wiki content to Obsidian vault
-SRC="/Users/th/.openclaw/workspace-leader/cognitive-flywheel/wiki/"
+SRC="$HOME/.openclaw/workspace-leader/cognitive-flywheel/wiki/"
 DST="/Volumes/t7_shield/ObsidianVault/llmwiki/"
 
 if [ ! -d "$DST" ]; then

@@ -43,20 +43,20 @@ class TestToVaultRel:
     """BUG FIX: source field must be vault-relative, not absolute."""
 
     def test_rss_article(self):
-        abs_path = "/Users/th/.openclaw/workspace-leader/cognitive-flywheel/raw/rss/2026-04-01-say-the-thing-you-want.md"
+        abs_path = "/Users/example/.openclaw/workspace-leader/cognitive-flywheel/raw/rss/2026-04-01-say-the-thing-you-want.md"
         assert _to_vault_rel(abs_path) == "raw/rss/2026-04-01-say-the-thing-you-want"
 
     def test_papers_article(self):
-        abs_path = "/Users/th/.openclaw/workspace-leader/cognitive-flywheel/raw/papers/some-paper.md"
+        abs_path = "/Users/example/.openclaw/workspace-leader/cognitive-flywheel/raw/papers/some-paper.md"
         assert _to_vault_rel(abs_path) == "raw/papers/some-paper"
 
     def test_web_article(self):
-        abs_path = "/Users/th/.openclaw/workspace-leader/cognitive-flywheel/raw/web/clipped-page.md"
+        abs_path = "/Users/example/.openclaw/workspace-leader/cognitive-flywheel/raw/web/clipped-page.md"
         assert _to_vault_rel(abs_path) == "raw/web/clipped-page"
 
     def test_no_extension(self):
         """Edge case: path without .md suffix."""
-        abs_path = "/Users/th/.openclaw/workspace-leader/cognitive-flywheel/raw/rss/article"
+        abs_path = "/Users/example/.openclaw/workspace-leader/cognitive-flywheel/raw/rss/article"
         assert _to_vault_rel(abs_path) == "raw/rss/article"
 
     def test_no_raw_ancestor(self):
@@ -65,13 +65,13 @@ class TestToVaultRel:
 
     def test_never_returns_absolute_path(self):
         """The original BUG: must NEVER return /Users/... paths."""
-        abs_path = "/Users/th/.openclaw/workspace-leader/cognitive-flywheel/raw/rss/test.md"
+        abs_path = "/Users/example/.openclaw/workspace-leader/cognitive-flywheel/raw/rss/test.md"
         result = _to_vault_rel(abs_path)
         assert not result.startswith("/"), f"Got absolute path: {result}"
 
     def test_never_returns_md_extension(self):
         """Obsidian wikilinks should NOT have .md extension."""
-        abs_path = "/Users/th/.openclaw/workspace-leader/cognitive-flywheel/raw/rss/test.md"
+        abs_path = "/Users/example/.openclaw/workspace-leader/cognitive-flywheel/raw/rss/test.md"
         result = _to_vault_rel(abs_path)
         assert not result.endswith(".md"), f"Got .md extension: {result}"
 
@@ -112,7 +112,7 @@ def wiki_env(tmp_path):
     return wiki
 
 
-def _sample_result(filepath="/Users/th/project/raw/rss/2026-05-30-test-article.md", **overrides):
+def _sample_result(filepath="/Users/example/project/raw/rss/2026-05-30-test-article.md", **overrides):
     """Build a sample ingest result dict."""
     base = {
         "_filepath": filepath,
@@ -263,7 +263,7 @@ class TestWriteIngestResultPeople:
             write_ingest_result(_sample_result())
             write_ingest_result(_sample_result(
                 title_en="Another Article",
-                filepath="/Users/th/project/raw/rss/2026-06-01-another.md",
+                filepath="/Users/example/project/raw/rss/2026-06-01-another.md",
             ))
 
         person_file = wiki_env / "people" / "alice-smith.md"
@@ -347,13 +347,13 @@ class TestSmokeThreeLayerIntegrity:
             # Simulate multiple ingest results
             results = [
                 _sample_result(
-                    filepath="/Users/th/project/raw/rss/2026-05-01-article-alpha.md",
+                    filepath="/Users/example/project/raw/rss/2026-05-01-article-alpha.md",
                     title_en="Article Alpha",
                     tags=["testing", "python"],
                     people=[{"name": "Bob Jones", "role": "Researcher"}],
                 ),
                 _sample_result(
-                    filepath="/Users/th/project/raw/rss/2026-05-02-article-beta.md",
+                    filepath="/Users/example/project/raw/rss/2026-05-02-article-beta.md",
                     title_en="Article Beta",
                     tags=["beta", "release"],
                     people=[
@@ -362,7 +362,7 @@ class TestSmokeThreeLayerIntegrity:
                     ],
                 ),
                 _sample_result(
-                    filepath="/Users/th/project/raw/papers/deep-paper.md",
+                    filepath="/Users/example/project/raw/papers/deep-paper.md",
                     title_en="Deep Paper",
                     tags=["research", "academic"],
                     people=[],
